@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:split_ease/screens/group_detail_screen.dart';
 import 'models/group.dart';
 import 'screens/add_group_screen.dart';
 
@@ -62,6 +63,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     leading: const CircleAvatar(child: Icon(Icons.group)),
                     title: Text(group.name),
                     subtitle: Text('${group.members.length} members'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GroupDetailScreen(group: group),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
