@@ -1,10 +1,21 @@
+import 'package:hive_ce/hive.dart';
 import 'expense.dart';
 
-class Group {
-  final String id;
-  final String name;
-  final List<String> members;
-  final List<Expense> expenses;
+part 'group.g.dart';
+
+@HiveType(typeId: 0)
+class Group extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String name;
+
+  @HiveField(2)
+  List<String> members;
+
+  @HiveField(3)
+  List<Expense> expenses;
 
   Group({
     required this.id,
@@ -13,15 +24,18 @@ class Group {
     List<Expense>? expenses,
   }) : expenses = expenses ?? [];
 
-  Map<String, double> calculateBalance() {
-    final Map<String, double> balance = {for (var m in members) m: 0.0};
+  Map<String, double> calculateBalances() {
+    final Map<String, double> balances = {for (var m in members) m: 0.0};
+
     for (final expense in expenses) {
       final splitAmount = expense.amount / expense.splitBetween.length;
-      balance[expense.paidBy] = (balance[expense.paidBy] ?? 0) + expense.amount;
+      balances[expense.paidBy] =
+          (balances[expense.paidBy] ?? 0) + expense.amount;
       for (final person in expense.splitBetween) {
-        balance[person] = (balance[person] ?? 0) - splitAmount;
+        balances[person] = (balances[person] ?? 0) - splitAmount;
       }
     }
-    return balance;
+
+    return balances;
   }
 }

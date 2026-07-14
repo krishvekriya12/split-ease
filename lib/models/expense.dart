@@ -1,8 +1,20 @@
-class Expense {
-  final String description;
-  final double amount;
-  final String paidBy;
-  final List<String> splitBetween;
+import 'package:hive_ce/hive.dart';
+
+part 'expense.g.dart';
+
+@HiveType(typeId: 1)
+class Expense extends HiveObject {
+  @HiveField(0)
+  String description;
+
+  @HiveField(1)
+  double amount;
+
+  @HiveField(2)
+  String paidBy;
+
+  @HiveField(3)
+  List<String> splitBetween;
 
   Expense({
     required this.description,

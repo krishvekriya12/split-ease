@@ -12,7 +12,7 @@ class GroupDetailScreen extends StatefulWidget {
 }
 
 class _GroupDetailScreenState extends State<GroupDetailScreen> {
-  Future<void> _addExpence() async {
+  Future<void> _addExpense() async {
     final newExpense = await Navigator.push<Expense>(
       context,
       MaterialPageRoute(
@@ -23,13 +23,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
     if (newExpense != null) {
       setState(() {
         widget.group.expenses.add(newExpense);
+        widget.group.save(); // Hive ko batao data update hua hai
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final balances = widget.group.calculateBalance();
+    final balances = widget.group.calculateBalances();
     return Scaffold(
       appBar: AppBar(title: Text(widget.group.name)),
       body: Column(
@@ -84,7 +85,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addExpence,
+        onPressed: _addExpense,
         child: const Icon(Icons.add),
       ),
     );
