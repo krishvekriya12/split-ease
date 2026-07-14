@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/expense.dart';
+import '../theme/app_theme.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final List<String> members;
@@ -16,14 +17,25 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String? _paidBy;
   final Set<String> _splitBetween = {};
 
+  @override
+  void initState() {
+    super.initState();
+    _splitBetween.addAll(widget.members);
+  }
+
   void _save() {
     if (_descController.text.trim().isEmpty ||
         _amountController.text.trim().isEmpty ||
         _paidBy == null ||
         _splitBetween.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Sab fields fill karo')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please fill all fields'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.textPrimary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
       return;
     }
 
@@ -38,87 +50,118 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _splitBetween.addAll(widget.members); // default: sab mein split
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Expense')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
+            Text('DESCRIPTION', style: _labelStyle()),
+            const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _descController,
               decoration: const InputDecoration(
-                labelText: 'Description (e.g. Dinner)',
-                border: OutlineInputBorder(),
+                hintText: 'e.g. Dinner at cafe',
               ),
+              textCapitalization: TextCapitalization.sentences,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
+
+            Text('AMOUNT', style: _labelStyle()),
+            const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _amountController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Amount',
-                border: OutlineInputBorder(),
-                prefixText: '₹ ',
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
+              decoration: const InputDecoration(
+                hintText: '0',
+                prefixText: '₹  ',
+              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Paid by',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            Text('PAID BY', style: _labelStyle()),
+            const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: widget.members.map((m) {
+                final selected = _paidBy == m;
                 return ChoiceChip(
                   label: Text(m),
-                  selected: _paidBy == m,
-                  onSelected: (selected) {
-                    setState(() => _paidBy = selected ? m : null);
-                  },
+                  selected: selected,
+                  onSelected: (v) => setState(() => _paidBy = v ? m : null),
+                  labelStyle: TextStyle(
+                    color: selected ? Colors.white : AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Split between',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            const SizedBox(height: AppSpacing.lg),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('SPLIT BETWEEN', style: _labelStyle()),
+                Text(
+                  '${_splitBetween.length} selected',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: widget.members.map((m) {
+                final selected = _splitBetween.contains(m);
                 return FilterChip(
                   label: Text(m),
-                  selected: _splitBetween.contains(m),
-                  onSelected: (selected) {
+                  selected: selected,
+                  onSelected: (v) {
                     setState(() {
-                      selected ? _splitBetween.add(m) : _splitBetween.remove(m);
+                      v ? _splitBetween.add(m) : _splitBetween.remove(m);
                     });
                   },
+                  showCheckmark: false,
+                  avatar: selected
+                      ? const Icon(Icons.check, size: 16, color: Colors.white)
+                      : null,
+                  labelStyle: TextStyle(
+                    color: selected ? Colors.white : AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 );
               }).toList(),
             ),
-            const Spacer(),
+            const SizedBox(height: AppSpacing.xl),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _save,
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Text('Add Expense'),
-                ),
+                child: const Text('Add Expense'),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  TextStyle _labelStyle() {
+    return const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: AppColors.textSecondary,
+      letterSpacing: 0.5,
     );
   }
 }
